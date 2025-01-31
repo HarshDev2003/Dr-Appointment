@@ -1,0 +1,297 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>Booking Form</title>
+  <style>
+    body {
+      background-color: #f3f4f6;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      font-weight: 700;
+      color: #4a5568;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #4a5568;
+    }
+
+    .btn-primary,
+    .btn-success {
+      width: 100%;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .time-slot {
+      padding: 10px 20px;
+      border: 2px solid #4caf50;
+      border-radius: 5px;
+      color: #4caf50;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .time-slot:hover,
+    .time-slot.active {
+      background-color: #4caf50;
+      color: #ffffff;
+    }
+
+    #timeSlots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-content {
+      border-radius: 10px;
+    }
+
+    .modal-header {
+      background-color: #4caf50;
+      color: #ffffff;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+    }
+
+    .modal-body p {
+      margin: 10px 0;
+      font-size: 1.1rem;
+    }
+
+    .modal-footer .btn {
+      width: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Appointment Booking</h2>
+    <form id="bookingForm" action="/submit-booking" method="POST">
+      <div class="form-group">
+        <label for="date">Choose a Date:</label>
+        <input type="date" class="form-control" id="date" name="date" required>
+      </div>
+
+      <div id="timeSlots">
+        <% if (timeSlots && timeSlots.length > 0) { %>
+        <% timeSlots.forEach((slot, index) => { %>
+        <div class="time-slot" data-index="<%= index %>">
+          <%= slot %>
+        </div>
+        <% }); %>
+        <% } else { %>
+        <p>No time slots available.</p>
+        <% } %>
+      </div>
+
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" class="form-control" id="name" name="name" placeholder="Enter your name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="sex">Sex:</label>
+        <select class="form-control" id="sex" name="sex" required>
+          <option value="">Select</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Transgender">Transgender</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="age">Age:</label>
+        <input type="number" class="form-control" id="age" name="age" placeholder="Enter your age" required>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address:</label>
+        <textarea class="form-control" id="address" name="address" rows="3" placeholder="Enter your address" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" required>
+      </div>
+
+      <div class="form-group">
+        <label for="doctor">Select Doctor:</label>
+        <select class="form-control" id="doctor" name="doctor" required>
+          <option value="">Loading Doctors...</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn btn-primary mt-3" id="previewBtn">Preview Booking</button>
+    </form>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').setAttribute('min', today);
+
+    $(document).ready(function () {
+      $.ajax({
+        url: '/bookings-api',
+        method: 'GET',
+        success: function (data) {
+          const doctorDropdown = $('#doctor');
+          doctorDropdown.empty();
+          doctorDropdown.append('<option value="">Select a Doctor</option>');
+          data.forEach(function (item) {
+            doctorDropdown.append(`<option value="${item.id}">${item.name}</option>`);
+          });
+        },
+        error: function () {
+          $('#doctor').html('<option value="">Error loading doctors</option>');
+        }
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+  const timeSlots = document.querySelectorAll('.time-slot');
+  const bookingForm = document.getElementById('bookingForm');
+
+  let selectedTimeSlot = null;
+
+  // Add event listener to each time slot
+  timeSlots.forEach(slot => {
+    slot.addEventListener('click', () => {
+      // Remove 'active' class from previously selected slot
+      if (selectedTimeSlot) {
+        selectedTimeSlot.classList.remove('active');
+      }
+
+      // Mark the clicked slot as active
+      slot.classList.add('active');
+      selectedTimeSlot = slot;
+
+      // Ensure the selected time slot value is updated in the form
+      let hiddenInput = document.querySelector('input[name="timeSlot"]');
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'timeSlot';
+        bookingForm.appendChild(hiddenInput);
+      }
+      hiddenInput.value = slot.textContent.trim();
+    });
+  });
+});
+
+$(document).ready(function() {
+      // On clicking the Preview button
+      $('#previewBtn').click(function() {
+        // Get form data
+        const name = $('#name').val();
+        const sex = $('#sex').val();
+        const age = $('#age').val();
+        const address = $('#address').val();
+        const email = $('#email').val();
+        const phone = $('#phone').val();
+        const date = $('#date').val();
+        const time = $('#time').val();
+        const booking = $('#booking option:selected').text(); // Get the selected doctor's name
+
+        // Populate the preview modal with the form data
+        $('#previewName').text(name);
+        $('#previewSex').text(sex);
+        $('#previewAge').text(age);
+        $('#previewAddress').text(address);
+        $('#previewEmail').text(email);
+        $('#previewPhone').text(phone);
+        $('#previewDate').text(date);
+        $('#previewTime').text(time);
+        $('#previewBooking').text(booking);
+
+        // Show the preview modal
+        $('#previewModal').modal('show');
+      });
+
+      // On downloading the preview as PDF
+      $('#downloadPreviewBtn').click(async function() {
+        // Get preview data
+        const name = $('#previewName').text();
+        const sex = $('#previewSex').text();
+        const age = $('#previewAge').text();
+        const address = $('#previewAddress').text();
+        const email = $('#previewEmail').text();
+        const phone = $('#previewPhone').text();
+        const date = $('#previewDate').text();
+        const time = $('#previewTime').text();
+        const booking = $('#previewBooking').text();
+
+        // Generate PDF using pdf-lib
+        const pdfDoc = await PDFLib.PDFDocument.create();
+        const page = pdfDoc.addPage([500, 600]);
+
+        // Add text to the PDF page
+        page.drawText('Booking Preview', { x: 180, y: 550, size: 20 });
+        page.drawText(`Name: ${name}`, { x: 50, y: 500, size: 15 });
+        page.drawText(`Sex: ${sex}`, { x: 50, y: 470, size: 15 });
+        page.drawText(`Age: ${age}`, { x: 50, y: 440, size: 15 });
+        page.drawText(`Address: ${address}`, { x: 50, y: 410, size: 15 });
+        page.drawText(`Email: ${email}`, { x: 50, y: 380, size: 15 });
+        page.drawText(`Phone: ${phone}`, { x: 50, y: 350, size: 15 });
+        page.drawText(`Selected Date: ${date}`, { x: 50, y: 320, size: 15 });
+        page.drawText(`Selected Time: ${time}`, { x: 50, y: 290, size: 15 });
+        page.drawText(`Selected Doctor: ${booking}`, { x: 50, y: 260, size: 15 });
+
+        // Serialize the PDFDocument to bytes (Uint8Array)
+        const pdfBytes = await pdfDoc.save();
+
+        // Create a Blob from the PDFBytes
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'booking-preview.pdf';
+
+        // Trigger the download
+        link.click();
+      });
+
+      // On confirming submission
+      $('#confirmSubmitBtn').click(function() {
+        // Submit the form after confirmation
+        $('#bookingForm').submit();
+      });
+    });
+
+  </script>
+</body>
+
+</html> -->

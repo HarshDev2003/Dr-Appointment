@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .profile-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .profile-card img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .profile-card h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+        }
+        .profile-card p {
+            margin: 10px 0;
+            font-size: 16px;
+            color: #555;
+        }
+        .profile-card .specialization {
+            font-weight: bold;
+            color: #007BFF;
+        }
+        .profile-card .contact {
+            margin-top: 15px;
+        }
+        .profile-card button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .profile-card button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-card">
+        <!-- Display profile image with correct dynamic path -->
+        <img src="/<%= doctor.image_url %>" alt="Dr. <%= doctor.doctor_name %>" class="profile-img">
+        
+        <!-- Doctor's name -->
+        <h1>Dr. <%= doctor.doctor_name %></h1>
+        
+        <!-- Doctor's specialization -->
+        <p class="specialization"><%= doctor.specialization %></p>
+        
+        <!-- Doctor's experience -->
+        <p>Experience: <%= doctor.experience %> years</p>
+        
+        <!-- Doctor's location -->
+        <p>Location: <%= doctor.location %></p>
+        
+        <!-- Doctor's contact information -->
+        <p class="contact">Contact: <%= doctor.contact %></p>
+        
+        <!-- Book Appointment button -->
+        <!-- <button onclick="window.location.href='/pdf/<%= doctor.id %>'">Generate PDF</button> -->
+
+        <button onclick="window.location.href='/home/pdf/<%= doctor.Id %>'">
+            Book Appointment
+        </button>
+    </div>
+    
+</body>
+</html>

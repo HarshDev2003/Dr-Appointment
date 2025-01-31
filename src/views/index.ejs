@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Web Message</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  <script src="/jsjq/jquery.min.js" charset="utf-8"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/socket.io/socket.io.js" charset="utf-8"></script>
+</head>
+<body>
+  <div class="container">
+    <br>
+    <div class="row">
+      <div class="col-md-12">
+        <h3 style="float:left"> <span style="color:#00CF68;font-family: 'sans-bold';">Web Chat</span></h3>
+        <!-- <a href="/logout" style="float:right" class="mt-2">🚀 Logout</a> -->
+        <a href="/list" style="float:right;" class="mt-2">🐋 Back</a>
+      </div>
+      <div class="col-md-12">
+        <!-- <div class="alert shadow" style="background:rgba(0, 207, 104, 0.11);color:#00b75c" role="alert">
+          Chat to, <strong> <%= data_receiver.name %></strong> 😀
+        </div> -->
+        <table class="table table-borderless table-o mt-4" style="width: 100%;border-top:1px solid #cdcdcd">
+          <tbody>
+            <tr style="border-bottom:1px solid #cdcdcd;">
+              <td style="width:65px"><img src="<%= img_profile != '' ? img_profile : '/img/default.png' %>" style="width:55px;height:55px;border-radius:50%;margin-left:-12px;" alt=""> </td>
+              <td style="vertical-align:middle">
+                <span style="margin-left:-5px;"><%= data_receiver.name %></span> <br>
+                <small style="margin-left:-5px;"><%= information == '' ? 'Hello, i\'am good people' : information %></small>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-md-12 mt-3">
+        <div id="chat" check="1__">
+
+          <% history_chat.forEach((v,i)=>{ %>
+
+            <% if (v.user_id ==  user_login.id_user) { %>
+              <p class="text-right mt-2" style="margin:0;padding:5px 0 5px"><small>You ~ <%= v.time_chat %></small></p>
+              <div class="p-3 text-right" style="background: rgba(0, 207, 104, 0.11);border-radius:7px;"><%= v.message %></div>
+              <% if (v.img != '') { %>
+                <p class="text-right mt-2" style="margin:0;padding:5px 0 5px"><small>You ~ <%= v.time_chat %></small></p>
+                <div class="text-right">
+                  <img src="<%= v.img %>" alt="" class="p-3" style="background: rgba(0, 207, 104, 0.11);border-radius:7px;width:255px;">
+                </div>
+              <% } %>
+            <% } else { %>
+              <p class="text-left mt-2" style="margin:0;padding:5px 0 5px"><small><%= data_receiver.name %> ~ <%= v.time_chat %></small></p>
+              <div class="p-3 text-left" style="background:#808f99;border-radius:7px;color:#fff"><%= v.message %></div>
+              <% if (v.img != '') { %>
+                <p class="text-left mt-2" style="margin:0;padding:5px 0 5px"><small><%= data_receiver.name %> ~ <%= v.time_chat %></small></p>
+                <div class="text-left" >
+                  <img src="<%= v.img %>" alt="" class="p-3" style="background: #808f99;border-radius:7px;width:255px;">
+                </div>
+              <% } %>
+            <% } %>
+
+          <% }) %>
+
+        </div>
+        <form id="messageForm" class="mt-4">
+          <div class="form-group row">
+            <div class="col-md-9">
+              <label>Enter Message</label>
+              <input type="text" required class="form-control" id="message" name="" value="" style="height:45px;" autocomplete="off">
+            </div>
+            <div class="col-md-3" style="display:inline;">
+              <button type="submit" style="width: 48%;height:45px;background:#40d58d;color:white" name="button" class="btn send">📨 Send</button>
+              <!-- <button type="button" style="width: 48%;height:45px;background:#40d58d;color:white;margin-left:5px" name="button" class="btn send" data-toggle="modal" data-target="#send_image"> Image</button> -->
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <footer class="row mt-4">
+      <div class="col-md-12" >
+        <div style="border-top:1px solid #00b75c;">
+          
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="modal fade" id="send_image" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form action="/sendimg" method="post" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Choose File</h5>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+              <input type="hidden" name="username" value="<%= user_login.username %>">
+              <input type="hidden" name="name" value="<%= user_login.name %>">
+              <input type="hidden" name="id_user" value="<%= user_login.id_user %>">
+              <input type="hidden" name="id_receiver" value="<%= data_receiver.id_user %>">
+              <input type="hidden" name="group_chat" value="<%= group.id_group_chat %>">
+              <input type="hidden" name="img_profile" value="<%= img_profile %>">
+              <input name="img" type="file" class="form-control-file" id="FormControlFile1" required accept="image/*">
+              <img src="" id="preview-profile" class="mt-2" alt="" style="width:100%">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn" style="background: #00CF68 !important;color: white;">Send Image</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+      $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+    })
+
+    $(function() {
+      let socket = io.connect()
+      let chat = $('#chat')
+      let messageForm = $('#messageForm')
+      let message = $('#message')
+
+      messageForm.submit(function(e) {
+        e.preventDefault()
+
+        socket.emit('send_message', {
+          username: '<%= user_login.username %>',
+          message: message.val(),
+          receiver: <%= data_receiver.id_user %>,
+          group: '<%= group.id_group_chat %>',
+          id_me: <%= user_login.id_user %>,
+          name: '<%= user_login.name %>',
+          img_profile: '<%= user_login.img_profile %>'
+        });
+        message.val('')
+      })
+
+      socket.on(`new_message_<%= group.id_group_chat %>`, function(data) {
+        if (data.sender == '~') {
+          alert("Can't send your message, please check your connection!");
+        }else if (data.sender == '~*') {
+          alert("App under maintenance, wait a few more moments ≧◠‿◠≦✌");
+        }else if (data.sender == '<%= user_login.username %>') {
+          chat.append(`<p class="text-right mt-2" style="margin:0;padding:5px 0 5px"><small>You ~ ${data.time}</small></p>
+                      <div class="p-3 text-right" style="background: rgba(0, 207, 104, 0.11);border-radius:7px;">${data.msg} </div>`)
+          if (data.img != '') {
+            chat.append(`<p class="text-right mt-2" style="margin:0;padding:5px 0 5px"><small>You ~ ${data.time}</small></p>
+                        <div class="text-right" style="">
+                          <img src="${data.img}" alt="" class="p-3" style="width:255px;background: rgba(0, 207, 104, 0.11);border-radius:7px;">
+                        </div>`)
+          }
+          $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+        } else {
+          chat.append(`<p class="text-left mt-2" style="margin:0;padding:5px 0 5px"><small><%= data_receiver.name %> ~ ${data.time}</small></p>
+                      <div class="p-3 text-left"  style="background: #808f99;border-radius:7px;color:#fff">${data.msg}</div>`)
+          $("html, body").animate({ scrollTop: $(document).height() }, 1000);
+          if (data.img != '') {
+            chat.append(`<p class="text-left mt-2" style="margin:0;padding:5px 0 5px"><small><%= data_receiver.name %> ~ ${data.time}</small></p>
+                        <div class="text-left" style="">
+                          <img src="${data.img}" class="p-3" alt="" style="background: #808f99;border-radius:7px;width:255px;">
+                        </div>`)
+          }
+        }
+
+        // console.log('ini di client');
+        console.log('<%= group.id_group_chat %>', 'ini id_group_chat');
+      })
+
+
+    })
+
+    function respo() {
+      if ($(window).width() > 768) {
+        $('.nbr0012').removeClass('mt-2');
+      } else {
+        $('.nbr0012').addClass('mt-2');
+      }
+    }
+
+    respo();
+    $(window).resize(function() {
+      respo();
+    })
+
+    $('#FormControlFile1').on('change', function() {
+      let reader = new FileReader()
+      reader.onload = function(){
+        var output = $('#preview-profile')[0]
+        output.src = reader.result
+      };
+      reader.readAsDataURL(event.target.files[0])
+    })
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Form with Preview</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      font-weight: 700;
+      color: #4a5568;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #4a5568;
+    }
+
+    .btn-primary,
+    .btn-success {
+      width: 100%;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+
+
+
+
+
+
+/*  */
+    .time-slot {
+  cursor: pointer;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin: 5px;
+  display: inline-block;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.time-slot.disabled {
+  background-color: #f8d7da;
+  color: #721c24;
+  cursor: not-allowed;
+}
+
+.time-slot.selected {
+  background-color: #d4edda;
+  color: #155724;
+  font-weight: bold;
+}
+/*  */
+
+
+
+
+
+
+
+.time-slot:hover,
+.time-slot.active {
+  background-color: #4caf50;
+  color: #ffffff;
+}
+
+#timeSlots {
+  display: flex;
+  justify-content: flex-start; /* Align slots to the start */
+  gap: 0; /* Remove gap between slots */
+  overflow-x: auto; /* Allow horizontal scrolling if needed */
+  padding: 0; /* Optional: Remove padding for a tighter layout */
+}
+
+#timeSlots::-webkit-scrollbar {
+  height: 5px; /* Optional scrollbar styling */
+}
+
+#timeSlots::-webkit-scrollbar-thumb {
+  background-color: #4caf50;
+  border-radius: 5px;
+}
+
+    .modal-content {
+      border-radius: 10px;
+    }
+
+    .modal-header {
+      background-color: #4caf50;
+      color: #ffffff;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+    }
+
+    .modal-body p {
+      margin: 10px 0;
+      font-size: 1.1rem;
+    }
+
+    .modal-footer .btn {
+      width: auto;
+    }
+    .time-slot {
+      display: inline-block;
+      padding: 10px 15px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      background-color: #f8f9fa;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .time-slot:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .time-slot.unavailable {
+      background-color: #d9534f;
+      color: white;
+      cursor: not-allowed;
+    }
+
+    .time-slot.selected {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2>Booking Form</h2>
+
+    <form action="/home/pdf/:id" method="GET" class="mt-4">
+      <div class="mb-3">
+        <label for="date" class="form-label">Select Date:</label>
+        <input type="date" id="date" name="date" class="form-control" value="<%= selectedDate %>" onchange="this.form.submit()" required>
+      </div>
+      <div class="mb-3">
+        <label for="doctor_id" class="form-label">Select Doctor:</label>
+        <select id="doctor_id" name="doctor_id" class="form-select" onchange="this.form.submit()" required>
+          <option value="1" <%= doctor_id == 1 ? 'selected' : '' %>>Doctor 1</option>
+          <option value="2" <%= doctor_id == 2 ? 'selected' : '' %>>Doctor 2</option>
+          <option value="3" <%= doctor_id == 3 ? 'selected' : '' %>>Doctor 3</option>
+          <option value="4" <%= doctor_id == 4 ? 'selected' : '' %>>Doctor 4</option>
+        </select>
+      </div>
+    </form>
+
+    <form id="bookingForm" action="/submit-booking" method="POST">
+
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          name="name"
+          required
+          placeholder="Enter your name"
+          value="<%= user.name || '' %>"
+        />
+      </div>
+      <div class="form-group">
+        <label for="sex">Sex</label>
+        <input class="form-control" id="sex" value="<%= user.sex || '' %>"></input>
+      </div>
+      
+      <div class="form-group">
+        <label for="age">Age</label>
+        <input
+          type="number"
+          class="form-control"
+          id="age"
+          name="age"
+          required
+          placeholder="Enter your age"
+          value="<%= user.age || '' %>"
+        />
+      </div>
+      <div class="form-group">
+        <label for="address">Address</label>
+        <textarea
+          class="form-control"
+          id="address"
+          name="address"
+          rows="3"
+          required
+          placeholder="Enter your address"
+        ><%= user.address || '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          name="email"
+          required
+          placeholder="Enter your email"
+          value="<%= user.email || '' %>"
+        />
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input
+          type="tel"
+          class="form-control"
+          id="phone"
+          name="phone"
+          required
+          placeholder="Enter your phone number"
+          value="<%= user.phone || '' %>"
+        />
+      </div>
+
+      <input type="hidden" id="date" name="date" value="<%= selectedDate %>">
+      <input type="hidden" id="doctor_id" name="doctor_id" value="<%= doctor_id %>">
+      <div class="mb-3">
+        <label class="form-label">Select Time Slot:</label>
+        <div id="timeSlots" class="d-flex flex-wrap">
+          <% 
+            const startTime = 9; // Starting hour (9 AM)
+            const endTime = 18; // Ending hour (6 PM)
+            for (let hour = startTime; hour < endTime; hour++) { 
+              const timeSlot = `${hour}:00`;
+              const isBooked = bookedSlots.includes(timeSlot);
+          %>
+            <div class="time-slot <%= isBooked ? 'unavailable' : '' %>" data-time="<%= timeSlot %>" 
+                 <%= isBooked ? 'disabled' : '' %>><%= timeSlot %> - <%= hour + 1 %>:00</div>
+          <% } %>
+        </div>
+        <input type="hidden" id="time" name="time" required>
+      </div>
+    
+
+   
+      
+      
+      
+     
+      
+      <button type="button" class="btn btn-primary" id="previewBtn">Preview</button>
+    </form>
+  </div>
+
+  <!-- Modal for Preview -->
+  <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previewModalLabel">Form Data Preview</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Name:</strong> <span id="previewName"></span></p>
+          <p><strong>Sex:</strong> <span id="previewSex"></span></p>
+          <p><strong>Age:</strong> <span id="previewAge"></span></p>
+          <p><strong>Address:</strong> <span id="previewAddress"></span></p>
+          <p><strong>Email:</strong> <span id="previewEmail"></span></p>
+          <p><strong>Phone:</strong> <span id="previewPhone"></span></p>
+          <p><strong>Selected Date:</strong> <span id="previewDate"></span></p>
+          <p><strong>Selected Time:</strong> <span id="previewTime"></span></p>
+          <p><strong>Selected Doctor:</strong> <span id="previewBooking"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Edit</button>
+          <button type="button" class="btn btn-primary" id="downloadPreviewBtn">Download Preview</button>
+          <button type="button" class="btn btn-success" id="confirmSubmitBtn">Confirm and Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+  <script>
+    const timeSlots = document.querySelectorAll('.time-slot:not(.unavailable)');
+    const timeInput = document.getElementById('time');
+  
+    timeSlots.forEach(slot => {
+      slot.addEventListener('click', () => {
+        timeSlots.forEach(s => s.classList.remove('selected')); // Remove "selected" from all slots
+        slot.classList.add('selected'); // Add "selected" to clicked slot
+        timeInput.value = slot.dataset.time; // Set hidden input value
+      });
+    });
+    $(document).ready(function() {
+      // On clicking the Preview button
+      $('#previewBtn').click(function() {
+        // Get form data
+        const name = $('#name').val();
+        const sex = $('#sex').val();
+        const age = $('#age').val();
+        const address = $('#address').val();
+        const email = $('#email').val();
+        const phone = $('#phone').val();
+        const date = $('#date').val();
+        const time = $('#selectedTimeSlot').val();
+
+        const booking = $('#booking option:selected').text(); // Get the selected doctor's name
+
+        // Populate the preview modal with the form data
+        $('#previewName').text(name);
+        $('#previewSex').text(sex);
+        $('#previewAge').text(age);
+        $('#previewAddress').text(address);
+        $('#previewEmail').text(email);
+        $('#previewPhone').text(phone);
+        $('#previewDate').text(date);
+        $('#previewTime').text(time);
+        $('#previewBooking').text(booking);
+
+        // Show the preview modal
+        $('#previewModal').modal('show');
+      });
+
+      // On downloading the preview as PDF
+      $('#downloadPreviewBtn').click(async function() {
+        // Get preview data
+        const name = $('#previewName').text();
+        const sex = $('#previewSex').text();
+        const age = $('#previewAge').text();
+        const address = $('#previewAddress').text();
+        const email = $('#previewEmail').text();
+        const phone = $('#previewPhone').text();
+        const date = $('#previewDate').text();
+        const time = $('#previewTime').text();
+        const booking = $('#previewBooking').text();
+
+        // Generate PDF using pdf-lib
+        const pdfDoc = await PDFLib.PDFDocument.create();
+        const page = pdfDoc.addPage([500, 600]);
+
+        // Add text to the PDF page
+        page.drawText('Booking Preview', { x: 180, y: 550, size: 20 });
+        page.drawText(`Name: ${name}`, { x: 50, y: 500, size: 15 });
+        page.drawText(`Sex: ${sex}`, { x: 50, y: 470, size: 15 });
+        page.drawText(`Age: ${age}`, { x: 50, y: 440, size: 15 });
+        page.drawText(`Address: ${address}`, { x: 50, y: 410, size: 15 });
+        page.drawText(`Email: ${email}`, { x: 50, y: 380, size: 15 });
+        page.drawText(`Phone: ${phone}`, { x: 50, y: 350, size: 15 });
+        page.drawText(`Selected Date: ${date}`, { x: 50, y: 320, size: 15 });
+        page.drawText(`Selected Time: ${time}`, { x: 50, y: 290, size: 15 });
+        page.drawText(`Selected Doctor: ${booking}`, { x: 50, y: 260, size: 15 });
+        page.drawText(`Selected Time: ${time}`, { x: 50, y: 290, size: 15 });
+
+
+        // Serialize the PDFDocument to bytes (Uint8Array)
+        const pdfBytes = await pdfDoc.save();
+
+        // Create a Blob from the PDFBytes
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'booking-preview.pdf';
+
+        // Trigger the download
+        link.click();
+      });
+
+      // On confirming submission
+      // $('#confirmSubmitBtn').click(function() {
+      //   // Submit the form after confirmation
+      //   $('#bookingForm').submit();
+      // });
+    });
+   
+//     $(document).ready(function() {
+//   $.ajax({
+//     url: '/api/bookings', // The endpoint to fetch doctors data
+//     method: 'GET',
+//     success: function(data) {
+//       const bookingDropdown = $('#booking');
+//       bookingDropdown.empty(); // Clear any existing options
+
+//       // Ensure there's data returned
+//       if (data && data.length > 0) {
+//         // First, add a default "Select a Doctor" option
+//         bookingDropdown.append('<option value="">Select a Doctor</option>');
+
+//         // Populate the dropdown with doctors' data
+//         data.forEach(function(item) {
+//           // Assuming 'item.id' is the doctor id and 'item.doctor_name' is the doctor's name
+//           bookingDropdown.append(`<option value="${item.id}">${item.doctor_name}</option>`);
+//         });
+//       } else {
+//         // If no doctors are available, show a default message
+  //       bookingDropdown.append('<option value="">No Doctors Available</option>');
+  //     }
+  //   },
+  //   error: function(err) {
+  //     console.error('Error fetching bookings:', err);
+  //     $('#booking').html('<option value="">Error loading bookings</option>');
+  //   }
+  // });
+
+//   // Set the minimum date for the date picker to today's date
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  document.getElementById('date').setAttribute('min', today);
+// });
+
+    document.addEventListener('DOMContentLoaded', () => {
+  const timeSlots = document.querySelectorAll('.time-slot');
+  const bookingForm = document.getElementById('bookingForm');
+
+  let selectedTimeSlot = null;
+
+//   // Add event listener to each time slot
+  timeSlots.forEach(slot => {
+    slot.addEventListener('click', () => {
+      // Remove 'active' class from previously selected slot
+      if (selectedTimeSlot) {
+        selectedTimeSlot.classList.remove('active');
+      }
+
+      // Mark the clicked slot as active
+      slot.classList.add('active');
+      selectedTimeSlot = slot;
+
+      // Ensure the selected time slot value is updated in the form
+      let hiddenInput = document.querySelector('input[name="timeSlot"]');
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'timeSlot';
+        bookingForm.appendChild(hiddenInput);
+      }
+      hiddenInput.value = slot.textContent.trim();
+    });
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const timeSlots = document.querySelectorAll(".time-slot");
+    const selectedTimeSlotInput = document.getElementById("selectedTimeSlot");
+
+    timeSlots.forEach((slot) => {
+      slot.addEventListener("click", function () {
+        // Remove active class from all slots
+        timeSlots.forEach(s => s.classList.remove("selected"));
+
+        // Add active class to the clicked slot
+        slot.classList.add("selected");
+
+        // Set the value of the hidden input field
+        selectedTimeSlotInput.value = slot.getAttribute("data-time");
+      });
+    });
+
+//     // Submit selected time slot
+    document.getElementById("submitTimeSlot").addEventListener("click", function () {
+      const selectedTimeSlot = selectedTimeSlotInput.value;
+      if (!selectedTimeSlot) {
+        alert("Please select a time slot.");
+        return;
+      }
+
+//       // Send data to the server
+      fetch('/save-time-slot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ time_slot: selectedTimeSlot }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("Time slot saved successfully!");
+          } else {
+            alert("Failed to save time slot. Please try again.");
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+  const timeSlots = document.querySelectorAll(".time-slot");
+  const selectedTimeSlotInput = document.getElementById("selectedTimeSlot");
+
+  timeSlots.forEach((slot) => {
+    slot.addEventListener("click", function () {
+      // Remove active class from all slots
+      timeSlots.forEach(s => s.classList.remove("active"));
+
+      // Add active class to the clicked slot
+      slot.classList.add("active");
+
+      // Set the value of the hidden input field
+      selectedTimeSlotInput.value = slot.textContent.trim();
+    });
+  });
+});
+
+document.getElementById('confirmSubmitBtn').addEventListener('click', () => {
+  // Collect data from the preview modal
+  const formData = {
+    name: document.getElementById('previewName').textContent,
+    sex: document.getElementById('previewSex').textContent,
+    age: document.getElementById('previewAge').textContent,
+    address: document.getElementById('previewAddress').textContent,
+    email: document.getElementById('previewEmail').textContent,
+    phone: document.getElementById('previewPhone').textContent,
+    date: document.getElementById('previewDate').textContent,
+    time: document.getElementById('previewTime').textContent,
+    doctor: document.getElementById('previewBooking').textContent,
+  };
+
+  // Send data to the backend using Fetch API
+  fetch('/submit-booking', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        alert('Booking successfully saved!');
+        // Optionally redirect to a success page
+        window.location.href = '/success';
+      } else {
+        alert('Failed to save booking: ' + data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('An error occurred while saving the booking.');
+    });
+});
+
+
+  </script>
+</body>
+</html>

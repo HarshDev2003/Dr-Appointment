@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inponow Web Message</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <script src="/jsjq/jquery.min.js" charset="utf-8"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/socket.io/socket.io.js" charset="utf-8"></script>
+  <style media="screen">
+    @font-face {
+      font-family: 'sans-bold';
+      src: url('/font/OpenSans-Bold.ttf');
+    }
+
+    @font-face {
+      font-family: 'sans';
+      src: url('/font/OpenSans-Regular.ttf');
+    }
+
+    body {
+      color: #000;
+      overflow-x: hidden;
+      font-family: 'sans';
+      height: 100%;
+      background-color: #fff;
+      background-repeat: no-repeat
+    }
+
+    .card2 {
+      margin: 0px 40px
+    }
+
+    .logo {
+      width: 250px;
+      margin-top: 20px;
+      margin-left: 35px;
+      /* padding: 30px 0 */
+    }
+
+    .image {
+      width: 360px;
+      height: 280px
+    }
+
+    .border-line {
+      border-right: 1px solid #EEEEEE
+    }
+
+    .text-sm {
+      font-size: 14px !important
+    }
+
+    .shadow {
+      /* box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px !important; */
+      box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0.3) 0px 0px 0px 1px !important;
+      border-radius: 7.2px;
+    }
+
+    ::placeholder {
+      color: #BDBDBD;
+      opacity: 1;
+      font-weight: 300
+    }
+
+    :-ms-input-placeholder {
+      color: #BDBDBD;
+      font-weight: 300
+    }
+
+    ::-ms-input-placeholder {
+      color: #BDBDBD;
+      font-weight: 300
+    }
+
+    input,
+    textarea {
+      padding: 10px 12px 10px 12px;
+      border: 1px solid transparent;
+      box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 0px 1px inset, rgba(0, 0, 0, 0.3) 0px 0px 0px 1px;
+      border-radius: 7px;
+      margin-bottom: 5px;
+      margin-top: 2px;
+      width: 100%;
+      color: #2C3E50;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    input:focus,
+    textarea:focus {
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      box-shadow: none !important;
+      border: 1px solid #304FFE;
+      outline-width: 0
+    }
+
+    button:focus {
+      -moz-box-shadow: none !important;
+      -webkit-box-shadow: none !important;
+      box-shadow: none !important;
+      outline-width: 0
+    }
+
+    a {
+      color: inherit;
+      cursor: pointer
+    }
+
+    .btn-blue {
+      width: 150px;
+      border-radius: 2px;
+      background: #00CF68 !important;
+      color: white;
+      border-color: #00CF68;
+      box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.20) !important;
+      border-radius: 7.2px;
+    }
+
+    .btn-blue:hover {
+      background-color: #000;
+      color: white;
+      cursor: pointer
+    }
+
+    .bg-blue {
+      color: #fff;
+      background-color: #00A3FF
+    }
+
+    @media screen and (max-width: 991px) {
+      .logo {
+        margin-left: 0px
+      }
+
+      .image {
+        width: 300px;
+        height: 220px
+      }
+
+      .border-line {
+        border-right: none
+      }
+
+    }
+  </style>
+</head>
+
+<body>
+              
+  <div class="row justify-content-center register__">
+    <div class="col-md-8" style="top: 7em;">
+      <div class="card border-0 shadow-sm p-4">
+        <h3 class="pb-3 text-center">
+          <span style="color: #00CF68; font-family: 'sans-bold';">Web Chat</span>
+        </h3>
+  
+        <form action="/newuser-signup" method="post">
+          <!-- Username and Full Name -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="username"
+                  id="username"
+                  required
+                  placeholder="Enter a valid username"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="name">Your Full Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="name"
+                  id="name"
+                  required
+                  autocomplete="off"
+                  placeholder="Your full name"
+                />
+              </div>
+            </div>
+          </div>
+  
+          <!-- Sex and Age -->
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="sex">Sex</label>
+                <select class="form-control" name="sex" id="sex" required>
+                  <option value="" disabled selected>Select your sex</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="age">Age</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  name="age"
+                  id="age"
+                  required
+                  placeholder="Your age"
+                  min="1"
+                />
+              </div>
+            </div>
+          </div>
+  
+          <!-- Address -->
+          <div class="form-group mt-3">
+            <label for="address">Address</label>
+            <textarea
+              class="form-control"
+              name="address"
+              id="address"
+              rows="2"
+              required
+              placeholder="Your address"
+            ></textarea>
+          </div>
+  
+          <!-- Email and Phone Number -->
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  id="email"
+                  required
+                  placeholder="Your email"
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  name="phone"
+                  id="phone"
+                  required
+                  placeholder="Your phone number"
+                />
+              </div>
+            </div>
+          </div>
+  
+          <!-- Password Field -->
+          <div class="form-group mt-3">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              name="password"
+              id="password"
+              required
+              placeholder="Enter password"
+            />
+          </div>
+  
+          <!-- Submit Button -->
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success">Register</button>
+          </div>
+  
+          <!-- Login Link -->
+          <div class="text-center mt-3">
+            <small>
+              Have an account?
+              <a href="/" class="font-weight-bold">Login</a>
+            </small>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+        
+  
+   
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/7.1.0/mdb.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-B2O2MGQvI2vNK2yJtqSV6zt5MK5dNVjBmGp7t6Zn4LJ98sj1uB26G0LGHxyjIEpD" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9JN6HLhv0VRBdSkeZv40KkOU6Ko40lPjl+DmOCp8YYLlY4IB+0q9Rtx" crossorigin="anonymous"></script>
+ 
+  <script type="text/javascript">
+    
+
+    $('.ccus').on('change', function () {
+      $.ajax({
+        url: "/check_username",
+        type: 'POST',
+        cache: false,
+        dataType: 'JSON',
+        data: {
+          username: $(this).val(),
+        },
+        success: function(result) {
+          console.log(result);
+          if (result == 1) {
+            // console.log('berhasil horeloca');
+            $('.username_check_area').html(`<div class="alert alert-danger alert-dismissible fade show shadow" role="alert">
+              Username <b style="text-transform:capitalize">${$('.ccus').val()}</b> has been used, type another username.
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>`);
+            $('.ccus').val('');
+          }else {
+            $('.username_check_area').html('');
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.error();
+        }
+      })
+    })
+
+    $(document).ready(function() {
+      setTimeout(function() {
+        $('.alert__').fadeOut();
+      }, 3000);
+    })
+
+    $('#chk1').on('change', function() {
+      if(this.checked) {
+        $('.passw1').attr('type', 'input');
+      }else {
+        $('.passw1').attr('type', 'password');
+      }
+    })
+
+
+
+
+
+
+  </script>
+</body>
+
+</html>

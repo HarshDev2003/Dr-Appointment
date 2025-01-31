@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Web Chat</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/custom.css">
+  <script src="/jsjq/jquery.min.js" charset="utf-8"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/bootstrap.js"></script>
+  <script src="/socket.io/socket.io.js" charset="utf-8"></script>
+  <script src="/node_modules/socket.io/lib/socket.js"></script>
+  <script src="/node_modules/socket.io/dist/socket.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <style>
+    .modal-body {
+    padding: 1rem; /* Adjust padding as needed */
+}
+.table {
+    font-size: 0.9rem; /* Adjust table font size for better readability */
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <br>
+    <div class="">
+      <div class="row">
+        <div class="col-md-12">
+          <h3 style="float:left"> <span style="color:#00CF68;font-family: 'sans-bold';">Web Chat</span></h3>
+          <a href="/logout" style="float:right;font-family: 'sans-bold';" class="mt-2">🚀 Logout</a>
+        </div>
+        <div class="col-md-12 mt-3">
+          <% if(flash == 1){ %>
+          <div class="alert shadow alert-dismissible fade show alert__" style="background:#1ab065;color:#e3e3e3;border:none" role="alert">
+            Login <b>Success !</b>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <% } %>
+          <div class="notification_area">
+
+          </div>
+          <div class="notification_del_area">
+
+          </div>
+            <div class="alert shadow" style="background:rgba(0, 207, 104, 0.11);color:#00b75c">
+            <span style="font-family: 'sans-bold'">Hello,</span> <%= user_login.name %> 😀
+          </div>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-12">
+          <ul class="nav nav-tabs" id="myTab" role="tablist" style="font-family: 'sans-bold'">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link active" id="home-tab" onclick="save_tab('home-tab')" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Your Chat</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="contact-tab" onclick="save_tab('contact-tab')" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">My Contact</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="profile-tab" onclick="save_tab('profile-tab')" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Profile</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="profile-tab"  target="_blank" href="/Voice" role="tab" aria-controls="profile" aria-selected="false">Voice Call</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="nav-link" id="profile-tab"  target="_blank" href="/Video" role="tab" aria-controls="profile" aria-selected="false">Video Call</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="booking" onclick="redirectToBookingPage()" role="tab">My Bookings</a>
+          </li>
+          
+            <!-- <li class="nav-item">
+              <a class="nav-link" id="appointment" onclick="showPopup()" data-toggle="tab" href="#appointment" role="tab" aria-controls="appointment" aria-selected="false">My Appointment</a>
+            </li>
+             -->
+             
+              <li class="nav-item">
+                  <a class="nav-link" id="appointment" onclick="showPopup()" role="tab">My Appointment</a>
+              </li>
+        
+          
+          </ul>
+        </div>
+      </div>
+
+
+    
+      
+   
+<!-- Bootstrap Modal -->
+
+ <!-- Popup Modal -->
+ <!-- Full-Screen Popup Modal -->
+ 
+ <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-fullscreen">
+     <div class="modal-content">
+       <div class="modal-header">
+         <h5 class="modal-title" id="appointmentModalLabel">Appointments</h5>
+         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <div id="dynamic-content">
+            <table class="table table-bordered">
+              <thead>
+                          <tr>
+                              <th>ID</th>
+                              <th>Name</th>
+                              <th>Sex</th>
+                              <th>Age</th>
+                              <th>Address</th>
+                              <th>Email</th>
+                              <th>Phone</th>
+                              <th>Date</th>
+                              <th>Time</th>
+                              <th>Doctor ID</th>
+                              <th>Created At</th>
+                          </tr>
+                      </thead>
+                      <tbody id="appointmentTableBody">
+                          <% appointments.forEach(appointment => { %>
+                              <tr>
+                                  <td><%= appointment.id %></td>
+                                  <td><%= appointment.name %></td>
+                                  <td><%= appointment.sex %></td>
+                                  <td><%= appointment.age %></td>
+                                  <td><%= appointment.address %></td>
+                                  <td><%= appointment.email %></td>
+                                  <td><%= appointment.phone %></td>
+                                  <td><%= appointment.date %></td>
+                                  <td><%= appointment.time %></td>
+                                  <td><%= appointment.doctor_id %></td>
+                                  <td><%= appointment.created_at %></td>
+                              </tr>
+                          <% }); %>
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+</div>
+
+
+
+      <div class="modal fade" id="bookingModal" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div id="dynamic-content-1">
+              <h5 class="modal-title" id="bookingModalLabel">Booking Form</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <!-- Your form goes here -->
+              <form>
+                <div class="form-group">
+                  <label for="name">Name</label>
+                  <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                  <label for="sex">Sex</label>
+                  <select class="form-control" id="sex" name="sex" required>
+                    <option value="">Select your sex</option> <!-- Placeholder option -->
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Transgender">Transgender</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="email">Email address</label>
+                  <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                  <label for="booking-details">Booking Details</label>
+                  <textarea class="form-control" id="booking-details" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="booking">Select Doctor</label>
+                  <select class="form-control" id="booking">
+                    <option value="">Loading Doctors...</option>
+                  </select>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Submit Booking</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+          <div class="row">
+            <div class="col-md-12">
+              <% if(chat_list == ''){ %>
+                <div class="empty_12">
+                  <br>
+                  <center><b>Empty chat data. Let's find friends and start communicating.</b></center>
+                </div>
+              <% } %>
+              <table class="table table-borderless table-o mt-3 table_chat" style="width: 100%;border-radius:5px;">
+                <tbody>
+                  <% chat_list.forEach((item, i) => { %>
+                  <tr style="border-bottom:1px solid #cdcdcd;z-index:1" class="tr_contact ea098<%= item.id_friend %>">
+                    <td style="width:65px"><img src="<%=item.img_profile != '' ? item.img_profile : '/img/default.png' %>" style="width:55px;height:55px;border-radius:50%" alt=""> </td>
+                    <td onclick="click_to_chat('/index/<%= item.id_friend %>')" style="cursor: pointer;vertical-align:middle;"> <b><%= item.name %></b>
+                      <br>
+                      <small> <span class="sender_chat_<%= item.username %>"><%= item.user_id == user_login.id_user ? 'You' : item.name %></span> : <span class="target_<%= item.username  %>"><%= item.message  %></span> </small>
+                    </td>
+                    <td style="vertical-align:top;float:right;text-align:end">
+                      <small class="target_time_<%= item.username  %>"><%= item.time_chat %></small>
+                      <br>
+                      <img src="/font/delete.png" class="trash-custom" style="z-index:2" onclick="del_chat(<%= item.id_friend %>, '<%= item.name %>')"> </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+          <div class="row list__">
+            <div class="col-md-12">
+              <br>
+            </div>
+            <div class="col-md-10">
+              <input type="text" class="form-control" oninput="searhContact(this)" style="width:100%;height:45px;" placeholder="Filter your friend name..." name="" value="">
+            </div>
+            <div class="col-md-2">
+              <button type="button" class="btn shadow nbr0012 btn-simple-cs" style="height:45px;" name="button_add_friend">➕ Find Friend</button>
+            </div>
+            <div class="col-md-12">
+              <table class="table table-borderless table-o mt-3 friend_list" style="width: 100%;border-radius:5px;">
+                <tbody>
+                  <% items.forEach((item, i) => { %>
+                  <tr style="border-bottom:1px solid #cdcdcd;" class="tr_contact ea097<%=item.id_user%>" >
+                    <td style="width:65px"><img src="<%=item.img_profile != '' ? item.img_profile : '/img/default.png' %>" style="width:55px;height:55px;border-radius:50%" alt=""> </td>
+                    <td style="vertical-align:middle;width:70%;cursor:pointer" onclick="click_to_chat('/index/<%= item.id_user %>')"><%= item.name %></td>
+                    <td><img src="/font/delete.png" class="trash-custom mt-2" style="z-index:2" onclick="del_contact(<%= item.id_user %>, '<%= item.name %>')"> </td>
+                  </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="add__ " style="display:none;background:rgba(0, 207, 104, 0.11);border-radius:10px;">
+                <div class="row mt-3 p-3">
+                  <div class="col-md-12">
+                    <h5 class="float-left font-weight-bold">Find Friend</h5>
+                    <button type="button" class="float-right" style="background:transparent;border:0;color:#00CF68;font-family:'sans-bold';" name="button_back">🏄🏽 Back</button>
+                  </div>
+                  <div class="col-md-10 mt-3">
+                    <input type="text" id="username__" style="height:45px;" class="form-control" autocomplete="off" placeholder="Search By Username..." value="">
+                  </div>
+                  
+                  <div class="col-md-2">
+                    <button type="button" class="btn shadow mt-3 find__ btn-simple-cs" style="height:45px;" name="button">🔍 Find</button>
+                  </div>
+                  <div class="col-md-12 find_area__">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+          <div class="row">
+            <div class="col-md-12">
+              <br>
+              <!-- <div class="p-5 mb-2" style="border-radius:10px;background:rgba(0, 207, 104, 0.11)">
+                <center>
+                  <img src="<%= img_profile != '' ? img_profile : '/img/default.png' %>" style="width:250px;border-radius:10px" title="click to change your photo" alt=""  data-toggle="modal" data-target="#edit_profil">
+                </center>
+              </div> -->
+              <table style="width:100%">
+                <tr style="border-bottom:1px solid #cdcdcd;">
+                  <td colspan="2"> <small>Name</small> </td>
+                </tr>
+                <tr>
+                  <td class="pt-2"style="width:95%">
+                   <span class="name_987"><%= user_login.name %></span>
+                  </td>
+                  <td class="pt-2"> <span onclick="update_info('name')" style="cursor: pointer;border:none;background:transparent" name="button">✏️</span> </td>
+                </tr>
+                <tr style="border-bottom:1px solid #cdcdcd;">
+                  <td class="pt-3"> <small>Information</small> </td>
+                </tr>
+                <tr>
+                  <td class="pt-2">
+                    <span class="information_987"><%= user_login.information %></span>
+                  </td>
+                  <td class="pt-2"><span onclick="update_info('information')" style="cursor: pointer;border:none;background:transparent" name="button">✏️</span></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="row mt-4">
+        <div class="col-md-12" >
+          <div style="border-top:1px solid #00b75c;">
+          
+          </div>
+        </div>
+      </footer>
+    </div>
+
+  </div>
+
+  <div class="position-fixed bottom-0 right-0 p-3" style="z-index: 5; right: 0; bottom: 0;">
+    <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+      <div class="toast-header">
+        <strong class="mr-auto">Inponow <span style="color:#00CF68;font-family: 'sans-bold';">Web Chat</span></strong>
+        <small>Now</small>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">
+         Username Form Input Can't Be Empty, Please Type..
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="edit_profil" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form action="/uploadpp" method="post" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit photo profile</h5>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+              <!-- <label for="exampleFormControlFile1">Choose Photo</label> -->
+              <!-- <input name="img" type="file" class="form-control-file" id="FormControlFile1" accept="image/*"> -->
+              <img src="<%= img_profile %>" id="preview-profile" class="mt-2" alt="" style="width:100%">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn" style="background: #00CF68 !important;color: white;">Save changes</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="areyousure" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body pt-5 pb-5">
+          <center>
+            <h4>Are you sure want to delete <span id="namefr"></span></h4>
+            <div class="mt-3">
+              <button type="button" class="btn btn-secondary" style="width:100px" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btndelyes" style="width: 100px;background: #00CF68 !important;color: white;">Yes</button>
+            </div>
+          </center>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="edit_info_profile" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <form action="/update_stat_info" method="post">
+          <div class="modal-header">
+            <h5 class="modal-title" id="title_info_profile"></h5>
+          </div>
+          <div class="modal-body">
+              <div class="form-group">
+                <input type="hidden" name="kind__" value="">
+                <input type="text" class="form-control mt-3 eip" style="height:45px;" name="val__" value="">
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn" style="background: #00CF68 !important;color: white;">Save changes</button>
+          </div>
+        </form>
+        </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+  $(function() {
+    let socket = io.connect()
+    socket.on(`notification_<%= user_login.id_user %>`, function(data) {
+      $('.notification_area').html(`<div class="alert shadow alert-dismissible fade show" style="background:rgba(0, 207, 104, 0.11);color:#00b75c" role="alert">
+        New Message From <b style="text-transform:capitalize">${data.sender}</b> ~ "${data.msg}"
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>`);
+      // console.log($(`.target_${data.sender}`).text(), 'cek notif');
+      $('.empty_12').hide();
+      if ($(`.target_${data.sender}`).text() == '') {
+        let new_message = `<tr style="border-bottom:1px solid #cdcdcd;" class="tr_contact ea098${data.id_receiver}" >
+                            <td style="width:65px"><img src="${data.img_profile != '' ? data.img_profile : '/img/default.png'}" style="width:55px;height:55px;border-radius:50%" alt=""> </td>
+                            <td onclick="click_to_chat('/index/${data.id_receiver}')" style="cursor: pointer;vertical-align:middle"><b>${data.name}</b>
+                              <br>
+                              <small>${data.name} : <span class="target_${data.sender}">${data.msg}</span> </small>
+                            </td>
+                            <td style="vertical-align:top;float:right;text-align:end"> <small class="target_time_${data.sender}">${data.time}</small> <br> <img src="/font/delete.png" class="trash-custom" style="z-index:2" onclick="del_chat(${data.id_receiver}, this)"></td>
+                          </tr>`;
+        $('.table_chat tbody').append(new_message);
+      }else {
+        $(`.target_${data.sender}`).text(data.msg);
+        $(`.target_time_${data.sender}`).text(data.time);
+        $(`.sender_chat_${data.sender}`).text(data.name);
+      }
+
+    })
+  })
+
+  function redirectToBookingPage() {
+    // Reference data to pass to the next page
+    // const referenceData = {
+    //     userId: 123, // Example data
+    //     bookingId: "ABC123"
+    // };
+
+    // Convert the reference data to a query string
+    // const queryString = new URLSearchParams(referenceData).toString();
+
+    // Redirect to the target page with the query string
+    window.location.href = `/home/pdf/:id`;
+}
+
+
+  function showPopupForm() {
+  $('#bookingModal').modal('show');
+    // This triggers the Bootstrap modal to appear
+}
+function showPopup() {
+  // Use Bootstrap's modal API to show the modal
+  $('#appointmentModal').modal('show');
+}
+
+// $(document).ready(function() {
+//       $.ajax({
+//         url: '/api/bookings',
+//         method: 'GET',
+//         success: function(data) {
+//           const bookingDropdown = $('#booking');
+//           bookingDropdown.empty(); // Clear any existing options
+//           bookingDropdown.append('<option value="">Select a booking</option>');
+
+//           // Populate the dropdown with data from the backend
+//           data.forEach(function(item) {
+//             bookingDropdown.append(`<option value="${item.Id}">${item.doctor_name}</option>`);
+//           });
+//         },
+//         error: function(err) {
+//           console.error('Error fetching bookings:', err);
+//           $('#booking').html('<option value="">Error loading bookings</option>');
+//         }
+//       });
+//     });
+
+
+
+
+        // Function to show the popup
+   
+  </script>
+
+<script>
+  function showPopup() {
+    fetch('/appointments')
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('dynamic-content').innerHTML = html; // Inject HTML content
+        })
+        .catch(err => console.error('Error loading content:', err));
+    // Open the modal
+    $('#appointmentModal').modal('show');   
+  }
+
+
+  // function showPopup1() {
+  //   fetch('/booking-api')
+  //       .then(response => response.text())
+  //       .then(html => {
+  //           document.getElementById('dynamic-content-1').innerHTML = html; // Inject HTML content
+  //       })
+  //       .catch(err => console.error('Error loading content:', err));
+  //   // Open the modal
+  //   $('#bookingModal').modal('show');
+  // }
+
+ 
+</script>
+  <script src="/js/custom_list.js" charset="utf-8"></script>
+</body>
+
+</html>
